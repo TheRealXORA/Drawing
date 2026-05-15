@@ -35,8 +35,8 @@ A Roblox drawing library that renders 2D shapes using ScreenGui elements inside 
 
 ## Getting Started
 
-```lua
-local Drawing = require(path.to.Drawing)
+```luau
+local Drawing = loadstring(game:HttpGet("https://raw.githubusercontent.com/TheRealXORA/Drawing/refs/heads/main/Drawing.luau", true))()
 
 local Circle = Drawing.new("Circle")
 Circle.Radius   = 50
@@ -50,7 +50,7 @@ Circle.Visible  = true
 
 ## Drawing.new
 
-```lua
+```luau
 Drawing.new(Shape: string) -> DrawingObject
 ```
 
