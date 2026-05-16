@@ -641,6 +641,7 @@ local function DrawPolygon(ShapeName, DefaultPoints)
             Line.Rounder.CornerRadius = UDim.new(1, 0)
             Line.Stroke.Enabled = Outlines.Stroke.Enabled
             Line.Gradient.Enabled = Outlines.Gradient.Enabled
+            Line.Stroke.LineJoinMode = Enum.LineJoinMode.Round
         end
         
         for Index = PointCount + 1, #Lines.Outer do
