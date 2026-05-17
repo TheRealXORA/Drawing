@@ -820,17 +820,24 @@ function Drawing.IsInShape(Shape, Target, OnScreenCheck)
     local Position = ConvertTargetToScreenPosition(Target, "Position/Target", OnScreenCheck)
     
     if ShapeType == "Circle" then
-        return (Position - Shape.Position).Magnitude <= Shape.Radius
+        local Distance = (Position - Shape.Position).Magnitude
+        return Distance <= Shape.Radius, Distance
     elseif ShapeType == "Square" then
         local Left = Shape.Position.X - Shape.AnchorPoint.X * Shape.Size.X
         local Top = Shape.Position.Y - Shape.AnchorPoint.Y * Shape.Size.Y
-        return Position.X >= Left and Position.X <= Left + Shape.Size.X and Position.Y >= Top and Position.Y <= Top + Shape.Size.Y
+        local CenterX = Left + Shape.Size.X / 2
+        local CenterY = Top + Shape.Size.Y / 2
+        local Distance = (Position - Vector2.new(CenterX, CenterY)).Magnitude
+        local IsInside = Position.X >= Left and Position.X <= Left + Shape.Size.X and Position.Y >= Top and Position.Y <= Top + Shape.Size.Y
+        return IsInside, Distance
     elseif ShapeType == "Line" then
         local LineDirection = Shape.To - Shape.From
         local LineLengthSquared = LineDirection:Dot(LineDirection)
         local HowFarAlongLine = LineLengthSquared > 0 and math.clamp((Position - Shape.From):Dot(LineDirection) / LineLengthSquared, 0, 1) or 0
         local ClosestPointOnLine = Shape.From + LineDirection * HowFarAlongLine
-        return (Position - ClosestPointOnLine).Magnitude <= Shape.Thickness / 2
+        local Distance = (Position - ClosestPointOnLine).Magnitude
+        return Distance <= Shape.Thickness / 2, Distance
+        
     else
         local Count = SideCounts[ShapeType] or (ShapeType == "NGon" and (Shape.Points or 3))
         local Verts = {}
@@ -860,7 +867,7 @@ function Drawing.IsInShape(Shape, Target, OnScreenCheck)
         local IsInside = false
         local VertexCount = #Verts
         local PreviousIndex = VertexCount
-       
+        
         for Index = 1, VertexCount do
             local CurrentVertex = Verts[Index]
             local PreviousVertex = Verts[PreviousIndex]
@@ -868,7 +875,6 @@ function Drawing.IsInShape(Shape, Target, OnScreenCheck)
             
             if EdgeCrossesRay then
                 local RayCrossX = (PreviousVertex.X - CurrentVertex.X) * (Position.Y - CurrentVertex.Y) / (PreviousVertex.Y - CurrentVertex.Y) + CurrentVertex.X
-                
                 if Position.X < RayCrossX then
                     IsInside = not IsInside
                 end
@@ -877,10 +883,10 @@ function Drawing.IsInShape(Shape, Target, OnScreenCheck)
             PreviousIndex = Index
         end
         
-        return IsInside
+        return IsInside, (Position - Shape.Position).Magnitude
     end
     
-    return false
+    return false, 0
 end
 
 return Drawing
